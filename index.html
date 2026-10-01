@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FeelCheck - What the weather really feels like</title>
+<meta name="description" content="Heat index and wind chill with NWS formulas and risk categories, in F or C. Runs in your browser.">
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; background:#10202c; color:#e8f1f7; line-height:1.6; }
+  .wrap { max-width:690px; margin:0 auto; padding:48px 20px 60px; }
+  .logo { font-size:46px; font-weight:800; } .logo span { color:#6fd0ff; }
+  .tag { font-size:19px; margin-top:10px; color:#bcd0dd; }
+  .cta { display:inline-block; margin-top:26px; background:#6fd0ff; color:#10202c; font-weight:700; padding:14px 30px; border-radius:12px; text-decoration:none; }
+  h2 { font-size:21px; margin:40px 0 10px; } p, li { color:#a9c0cf; margin-bottom:8px; } ul { margin-left:20px; }
+  .demo { margin-top:26px; background:#193244; border-radius:14px; padding:18px; display:flex; gap:18px; flex-wrap:wrap; }
+  .demo div { flex:1; min-width:140px; } .demo b { display:block; font-size:30px; color:#6fd0ff; }
+  footer { margin-top:50px; font-size:13px; color:#7f99a9; } a { color:#6fd0ff; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="logo">Feel<span>Check</span></div>
+  <div class="tag">96&deg;F with 65% humidity is not 96. It is 121. FeelCheck turns air temperature, humidity and wind into what your body actually gets, and says when it gets risky.</div>
+  <a class="cta" href="app.html">Check the weather &rarr;</a>
+  <div class="demo"><div><b>121&deg;F</b>feels like at 96&deg;F and 65% humidity (Danger)</div><div><b>-19&deg;F</b>feels like at 0&deg;F with 15 mph wind</div><div><b>30 min</b>to frostbite on exposed skin at that wind chill</div></div>
+  <h2>What you get</h2>
+  <ul>
+    <li>Heat index with the official NWS categories, from caution to extreme danger</li>
+    <li>Wind chill from the NWS formula, with a frostbite note and the above-freezing rule</li>
+    <li>A small table that shows how humidity or wind changes the answer</li>
+    <li>Fahrenheit or Celsius; mph, km/h or m/s; runs in your browser</li>
+  </ul>
+  <footer>Guidance for healthy adults, not medical advice. Sources: <a href="https://www.wpc.ncep.noaa.gov/html/heatindex_equation.shtml">NWS heat index equation</a>, <a href="https://www.weather.gov/safety/cold-wind-chill-chart">NWS wind chill</a><br>App Factory project. <a href="https://github.com/iLanis-agent/feelcheck">Code</a></footer>
+</div>
+</body>
+</html>

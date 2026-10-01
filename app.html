@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FeelCheck - What the weather really feels like</title>
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; background:#10202c; color:#e8f1f7; line-height:1.5; }
+  .wrap { max-width:680px; margin:0 auto; padding:26px 18px 60px; }
+  a { color:#6fd0ff; } h1 { font-size:28px; } h1 span { color:#6fd0ff; } .sub { color:#9cb4c4; margin:4px 0 18px; }
+  .card { background:#193244; border-radius:14px; padding:16px; margin-bottom:14px; }
+  label { display:block; font-size:13px; color:#9cb4c4; margin:10px 0 4px; }
+  input, select { width:100%; padding:11px; border-radius:9px; border:1px solid #2f5068; background:#10202c; color:#e8f1f7; font-size:16px; }
+  .row { display:flex; gap:10px; } .row > div { flex:1; }
+  .seg { display:flex; gap:8px; } .seg button { flex:1; padding:11px; border-radius:9px; border:1px solid #2f5068; background:#10202c; color:#9cb4c4; font-size:15px; cursor:pointer; }
+  .seg button.on { background:#6fd0ff; color:#10202c; font-weight:700; border-color:#6fd0ff; }
+  .big { font-size:48px; font-weight:800; line-height:1.1; } .lbl { font-size:13px; color:#9cb4c4; }
+  .pill { display:inline-block; padding:5px 12px; border-radius:99px; font-weight:700; font-size:14px; margin-top:6px; }
+  .caution { background:#e6c84a; color:#2b2400; } .extreme-caution { background:#f0a23a; color:#2b1800; } .danger { background:#e2573a; color:#fff; } .extreme-danger { background:#a3182b; color:#fff; } .none, .cold, .air { background:#2f5068; color:#e8f1f7; } .frost { background:#5aa7e8; color:#06121c; }
+  .note { font-size:14px; color:#c3d6e3; margin-top:10px; } h2 { font-size:17px; margin-bottom:8px; }
+  .small { font-size:13px; color:#9cb4c4; margin-top:10px; }
+  table { width:100%; border-collapse:collapse; font-size:14px; } td, th { padding:6px 4px; border-bottom:1px solid #284558; text-align:left; } th { color:#9cb4c4; font-weight:600; } tr.hit td { color:#6fd0ff; font-weight:700; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Feel<span>Check</span></h1>
+  <div class="sub">The thermometer says one thing. Humidity and wind change what your body gets.</div>
+  <div class="card">
+    <div class="seg" id="tu"><button data-v="F" class="on">&deg;F</button><button data-v="C">&deg;C</button></div>
+    <div class="row"><div><label for="t">Air temperature</label><input id="t" type="number" step="1" value="96"></div>
+    <div><label for="rh">Humidity (%)</label><input id="rh" type="number" min="0" max="100" step="1" value="65"></div></div>
+    <div class="row"><div><label for="v">Wind speed</label><input id="v" type="number" min="0" step="1" value="5"></div>
+    <div><label for="vu">Wind unit</label><select id="vu"><option value="mph">mph</option><option value="kmh">km/h</option><option value="ms">m/s</option></select></div></div>
+  </div>
+  <div class="card" id="out"></div>
+  <div class="card" id="tbl"></div>
+  <div class="card"><h2>About these numbers</h2>
+    <div class="small" style="margin-top:0">Heat index uses the NWS Rothfusz regression with its published adjustments; it assumes shade and light wind, and direct sun can add up to about 15&deg;F. Wind chill uses the 2001 NWS formula and applies to air at or below 50&deg;F with wind above 3 mph. Both are for healthy adults, and are guidance, not medical advice. Sources: <a href="https://www.wpc.ncep.noaa.gov/html/heatindex_equation.shtml">NWS heat index equation</a>, <a href="https://www.weather.gov/ama/heatindex">NWS heat categories</a>, <a href="https://www.weather.gov/safety/cold-wind-chill-chart">NWS wind chill</a>. <a href="index.html">About</a></div>
+  </div>
+</div>
+<script src="engine.js"></script>
+<script>
+var unit = 'F', $ = function (i) { return document.getElementById(i); };
+var b = $('tu').querySelectorAll('button');
+for (var i = 0; i < b.length; i++) b[i].onclick = function () {
+  var v = parseFloat($('t').value), to = this.getAttribute('data-v'); if (to === unit) return;
+  for (var j = 0; j < b.length; j++) b[j].className = ''; this.className = 'on';
+  if (!isNaN(v)) $('t').value = Math.round(to === 'C' ? Feel.fToC(v) : Feel.cToF(v)); unit = to; render();
+};
+function disp(f) { return unit === 'C' ? Math.round(Feel.fToC(f)) + '&deg;C' : Math.round(f) + '&deg;F'; }
+function render() {
+  var t = parseFloat($('t').value), rh = parseFloat($('rh').value), v = parseFloat($('v').value);
+  if (isNaN(t) || isNaN(rh) || isNaN(v) || rh < 0 || rh > 100 || v < 0) { $('out').innerHTML = '<div class="lbl">Enter temperature, humidity (0 to 100) and wind speed.</div>'; $('tbl').innerHTML = ''; return; }
+  var F = unit === 'C' ? Feel.cToF(t) : t, V = Feel.toMph(v, $('vu').value), r = Feel.feels(F, rh, V), h = '', tb = '';
+  if (r.mode === 'heat') {
+    h = '<div class="lbl">Feels like</div><div class="big" id="val">' + disp(r.value) + '</div><span class="pill ' + r.heat.key + '" id="cat">' + r.heat.label + '</span><div class="note">' + r.heat.note + ' Drink water, take shade breaks, and never leave people or pets in a parked car.</div>';
+    tb = '<h2>How humidity changes it at ' + disp(F) + '</h2><table><tr><th>Humidity</th><th>Feels like</th><th>Category</th></tr>';
+    [20, 40, 60, 80, 100].forEach(function (x) { var hi = Feel.heatIndex(F, x).hi; tb += '<tr' + (Math.abs(x - rh) < 10 ? ' class="hit"' : '') + '><td>' + x + '%</td><td>' + disp(hi) + '</td><td>' + Feel.heatCategory(hi).label + '</td></tr>'; });
+    tb += '</table>';
+  } else if (r.mode === 'cold') {
+    h = '<div class="lbl">Feels like</div><div class="big" id="val">' + disp(r.value) + '</div><span class="pill ' + (r.frost30 ? 'frost' : 'cold') + '" id="cat">' + (r.frost30 ? 'Frostbite risk' : 'Wind chill') + '</span>';
+    h += '<div class="note" id="cnote">' + (r.frost30 ? 'At this wind chill, exposed skin can freeze in about 30 minutes or less (NWS). Cover skin and limit time outside.' : (r.frostbiteAir ? 'Air is below freezing, so exposed skin can get frostbite in long exposure. Cover ears, face and hands.' : 'Air is above freezing, so frostbite is not expected, but wet and windy weather can still cause hypothermia. Dress in layers.')) + '</div>';
+    tb = '<h2>How wind changes it at ' + disp(F) + '</h2><table><tr><th>Wind</th><th>Feels like</th></tr>';
+    [5, 10, 15, 20, 30].forEach(function (x) { tb += '<tr' + (Math.abs(x - V) < 2.5 ? ' class="hit"' : '') + '><td>' + (unit === 'C' ? Math.round(x * 1.609344) + ' km/h' : x + ' mph') + '</td><td>' + disp(Feel.windChill(F, x)) + '</td></tr>'; });
+    tb += '</table>';
+  } else {
+    h = '<div class="lbl">Feels like</div><div class="big" id="val">' + disp(F) + '</div><span class="pill air" id="cat">About the air temperature</span><div class="note">Heat index starts near 80&deg;F, and wind chill needs air at or below 50&deg;F with wind above 3 mph. Neither applies here.</div>';
+  }
+  $('out').innerHTML = h; $('tbl').innerHTML = tb;
+}
+['t', 'rh', 'v', 'vu'].forEach(function (i) { $(i).oninput = render; $(i).onchange = render; });
+render();
+</script>
+</body>
+</html>
